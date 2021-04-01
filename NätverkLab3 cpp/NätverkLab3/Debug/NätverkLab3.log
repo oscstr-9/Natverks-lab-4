@@ -1,0 +1,4 @@
+﻿  main.cpp
+C:\Users\oscstr-9-local\source\repos\NätverkLab3\NätverkLab3\main.cpp(13,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
+C:\Users\oscstr-9-local\source\repos\NätverkLab3\NätverkLab3\main.cpp(25,6): warning C4101: 'pack': unreferenced local variable
+  NätverkLab3.vcxproj -> C:\Users\oscstr-9-local\source\repos\NätverkLab3\Debug\NätverkLab3.exe

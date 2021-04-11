@@ -113,6 +113,54 @@ struct TextMessageMsg {
     char text[1];   //NULL-terminerad array of chars.
 };
 
+// Info for each pixel to be sent
+struct PixelInfo {
+    BYTE x;
+    BYTE y;
+    BYTE color;
+};
+
+/// Holds all info to be sent via network
+struct SendInfo {
+    short amountOfPixels;
+    PixelInfo pixels[16];
+}pack;
+
+void SendPosToGui(SOCKET javaSocket, unsigned char x, unsigned char y, unsigned char clientId) {
+    // Bind the ip address and port to a socket
+    //sockaddr_in6 hint;
+    //hint.sin6_family = AF_INET6;
+    //hint.sin6_port = htons(54000);
+    //hint.sin6_addr = in6addr_any; // Could also use inet_pton ....
+
+    sockaddr_in6 hint;
+    memset(&hint, 0, sizeof(hint));
+    hint.sin6_family = AF_INET6;
+    hint.sin6_port = htons(54000);
+    inet_pton(AF_INET6, "::1", &hint.sin6_addr);
+    
+    std::cout << x << endl;
+    std::cout << y << endl;
+    std::cout << clientId << endl;
+    PixelInfo pixel = { x,y,clientId };
+    SendInfo info = {1, pixel};
+    int sendOk = sendto(javaSocket, (const char*)&info, sizeof(PixelInfo), 0, (sockaddr*)&hint, sizeof(hint));
+    if (sendOk == SOCKET_ERROR) {
+        std::cout << "Could not send pos msg!" << endl;
+        return;
+    }
+}
+
+void SendLeaveToGui() {
+    // Bind the ip address and port to a socket
+    sockaddr_in6 hint;
+    hint.sin6_family = AF_INET6;
+    hint.sin6_port = htons(54000);
+    hint.sin6_addr = in6addr_any; // Could also use inet_pton ....
+
+
+}
+
 // Function to move player to specified positions
 int MoveFunc(int x, int y, int clientId, SOCKET out) {
     MoveEvent moving = {
@@ -130,6 +178,7 @@ int MoveFunc(int x, int y, int clientId, SOCKET out) {
 
 bool isFinished = false;
 int x = 0, y = 0;
+
 void DoWork(SOCKET out, int clientId) {
     // Create variables for message holding
     char buf[65536];
@@ -142,6 +191,7 @@ void DoWork(SOCKET out, int clientId) {
     recv(out, buf, sizeof(buf), 0);
     // Update position
     MoveFunc(-100, -100, clientId, out);
+
     recv(out, buf, sizeof(buf), 0);
 
     // useful info
@@ -154,9 +204,7 @@ void DoWork(SOCKET out, int clientId) {
     cout << "X: " << NPPmsg->pos.x << endl;
     cout << "Y: " << NPPmsg->pos.y << endl;
     cout << "<---------------------------->" << endl << endl;
-
-
-    // add switch case for msghead types and different messages
+    SendPosToGui(out, NPPmsg->pos.x, NPPmsg->pos.y, msg->head.id);
 
 
     // Listen for incomming messages
@@ -172,6 +220,7 @@ void DoWork(SOCKET out, int clientId) {
             cout << "NewPlayer msg" << endl;
             cout << "Player name: " << NPmsg->name << endl;
             cout << "Player ID: " << NPmsg->msg.head.id << endl << endl;
+            SendPosToGui(out, NPPmsg->pos.x, NPPmsg->pos.y, msg->head.id);
             break;
 
         case PlayerLeave:
@@ -184,6 +233,8 @@ void DoWork(SOCKET out, int clientId) {
 
             cout << "Player ID: " << NPPmsg->msg.head.id << endl;
             cout << "Current pos: x = " << NPPmsg->pos.x << " y = " << NPPmsg->pos.y << endl << endl;
+            SendPosToGui(out, NPPmsg->pos.x, NPPmsg->pos.y, msg->head.id);
+
 
             if (NPmsg->msg.head.id == clientId) {
             // Update position
@@ -206,21 +257,21 @@ void main() {
     int wsOK = WSAStartup(version, &data);
     if (wsOK != 0) {
         cout << "Can't start Winsock! " << wsOK;
+        return;
     }
 
     /// Create a hint structure for the server
     sockaddr_in server;
     memset(&server, 0, sizeof(server));
     server.sin_family = AF_INET;
-    server.sin_port = htons(49153);
+    server.sin_port = htons(49154);
     inet_pton(AF_INET, "130.240.40.7", &server.sin_addr);
 
     /// Socket creation
-    SOCKET out = socket(AF_INET, SOCK_STREAM, 0);
-
+    SOCKET gameSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     /// Connect to server and creates join message
-    connect(out, (const sockaddr*)&server, sizeof(server));
+    connect(gameSocket, (const sockaddr*)&server, sizeof(server));
     JoinMsg joining = {
         {0,0,0,Join},
         StaticObject,
@@ -230,77 +281,56 @@ void main() {
     joining.head.length = sizeof(joining);
 
     /// Sends joining package
-    int sendOK = send(out, (const char*)&joining, joining.head.length, 0);
+    int sendOK = send(gameSocket, (const char*)&joining, joining.head.length, 0);
 
     // some variables
     char buf[65536];
-    recv(out, buf, sizeof(buf), 0);
+    recv(gameSocket, buf, sizeof(buf), 0);
     ChangeMsg* msg = (ChangeMsg*)buf;
     int clientId = msg->head.id;
 
-    // Create second thread
-    thread listener(DoWork, out, clientId);
+//----------------------------------For JAVA------------------------------------------
 
-    /// Create specified package
-    
+    // Bind the ip address and port to a socket
+    sockaddr_in6 hint;
+    hint.sin6_family = AF_INET6;
+    hint.sin6_port = htons(54001);
+    hint.sin6_addr = in6addr_any; // Could also use inet_pton ....
+
+    SOCKET javaSocket = socket(AF_INET6, SOCK_DGRAM, 0);
+
+    bind(javaSocket, (const sockaddr*)&hint, sizeof(hint));
+
+    // Create the master file descriptor set and zero it
+    fd_set master;
+    FD_ZERO(&master);
+
+    FD_SET(gameSocket, &master);
+    FD_SET(javaSocket, &master);
+
+    //Send package to everyone
     while (true) {
-        char buff[16];
-        scanf_s("%s", buff, sizeof(buff));
-        for (int i = 0; i < sizeof(buff); i++)
-        {
-            buff[i] = tolower(buff[i]);
+        fd_set copy = master;
+
+        if (select(0, &copy, nullptr, nullptr, nullptr) == -1) {
+            std::cout << GetLastError() << endl;
+            return;
         }
 
-        // Gives all possible commands
-        if (strcmp(buff, "help") == 0) {
-            cout << "All possible commands at this time are:"
-                << endl << "* moveU" 
-                << endl << "* moveD"
-                << endl << "* moveL"
-                << endl << "* moveR"
-                << endl << "* help"
-                << endl << "* leave"
-                << endl;
+        if (FD_ISSET(gameSocket, &copy)) {
+            DoWork(gameSocket, clientId);
         }
-        // Move up
-        else if (strcmp(buff, "moveu") == 0) {
-            MoveFunc(x, y+1, clientId, out);
-        }
-        // move down
-        else if (strcmp(buff, "moved") == 0) {
-            MoveFunc(x, y-1, clientId, out);
-        }
-        // Move left
-        else if (strcmp(buff, "movel") == 0) {
-            MoveFunc(x-1, y, clientId, out);
-        }
-        // Move right
-        else if (strcmp(buff, "mover") == 0) {
-            MoveFunc(x+1, y, clientId, out);
-        }
-        // Leave
-        else if (strcmp(buff, "leave") == 0) {
-            // Create leaving message
-            LeaveMsg leaving = {
-            {0,0,clientId,Leave}
-            };
-            leaving.head.length = sizeof(leaving);
-            int sendOK = send(out, (const char*)&leaving, leaving.head.length, 0);
-            // Checks if package got sent OK
-            if (sendOK == SOCKET_ERROR) {
-                cout << "Socket error at leave! " << WSAGetLastError() << endl;
-            }
-            break;
-        }
-        else {
-            cout << "Incorrect command input! Try help" << endl;
+        
+        if (FD_ISSET(javaSocket, &copy))
+        {
+
         }
     }
 
-    /// Close socket and cleanup WSA and let other threads catch up
-    isFinished = true;
-    listener.join();
-    Sleep(500);
-    closesocket(out);
+
+    /// Create specified package
+    
+
+    closesocket(gameSocket);
     WSACleanup();
 }

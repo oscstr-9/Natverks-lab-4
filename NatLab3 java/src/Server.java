@@ -44,6 +44,8 @@ public class Server {
             // blocks until a packet is received
             udpSocket.receive(packet);
 
+            System.out.println(packet);
+
             msg.clear();
             int amountOfPixels = (Byte.toUnsignedInt(packet.getData()[0])+((packet.getData()[1])<<8));
             System.out.print(amountOfPixels);

@@ -1,8 +1,11 @@
+import java.io.IOException;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
 /**
+ <--THIS IS THE GUI-->
+
  Allows the pixels to have their color and position set on the canvas
  and for the pixels to be drawn.
 
@@ -42,19 +45,22 @@ public class PixelCanvas extends JComponent {
                         g.setColor(Color.black);
                         break;
                     case 5:
-                        g.setColor(Color.yellow);
+                        g.setColor(Color.YELLOW);
                         break;
                     case 6:
                         g.setColor(new Color(250,0,150));
                         break;
                     case 7:
-                        g.setColor(new Color(120,0,200));
+                        g.setColor(new Color(0,200,255));
                         break;
                     case 8:
                         g.setColor(Color.cyan);
                         break;
                 }
-                g.fillRect(pixel.get(i).getX(), pixel.get(i).getY(), 8, 8);
+                System.out.print("width / 2: ");
+                System.out.print(pixel.get(i).getX());
+                System.out.print("\n");
+                g.fillRect(pixel.get(i).getX(), pixel.get(i).getY(), 4, 4);
             }
         }
     }

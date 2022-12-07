@@ -59,7 +59,7 @@ void main() {
         {
             for (int j = 0; j < 200; j += 4)
             {
-                info.pixels[index] = PixelInfo{ (unsigned char)j,(unsigned char)i,(unsigned char)(color)};
+                info.pixels[index] = PixelInfo{ (unsigned char)j,(unsigned char)i,(unsigned char)(color) };
                 index++;
             }
         }

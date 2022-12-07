@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Documantation">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/NatLab3 java/Documantation/type-search-index.zip!/" />
+      <root url="jar://$PROJECT_DIR$/NatLab3 java/Documantation/member-search-index.zip!/" />
+      <root url="jar://$PROJECT_DIR$/NatLab3 java/Documantation/package-search-index.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

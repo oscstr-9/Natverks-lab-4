@@ -10,8 +10,8 @@ public class Pixel {
     int x, y, color;
 
         public Pixel(int xIn, int yIn, int colorIn){
-            x = 4*xIn;
-            y = 4*yIn;
+            x = xIn * 4;
+            y = yIn * 4;
             color = colorIn;
         }
 

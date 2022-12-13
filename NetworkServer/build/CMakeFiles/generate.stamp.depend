@@ -1,0 +1,23 @@
+# CMake generation dependency list for this directory.
+D:/Cmake/share/cmake-3.19/Modules/CMakeCInformation.cmake
+D:/Cmake/share/cmake-3.19/Modules/CMakeCXXInformation.cmake
+D:/Cmake/share/cmake-3.19/Modules/CMakeCommonLanguageInclude.cmake
+D:/Cmake/share/cmake-3.19/Modules/CMakeGenericSystem.cmake
+D:/Cmake/share/cmake-3.19/Modules/CMakeInitializeConfigs.cmake
+D:/Cmake/share/cmake-3.19/Modules/CMakeLanguageInformation.cmake
+D:/Cmake/share/cmake-3.19/Modules/CMakeRCInformation.cmake
+D:/Cmake/share/cmake-3.19/Modules/CMakeSystemSpecificInformation.cmake
+D:/Cmake/share/cmake-3.19/Modules/CMakeSystemSpecificInitialize.cmake
+D:/Cmake/share/cmake-3.19/Modules/Compiler/CMakeCommonCompilerMacros.cmake
+D:/Cmake/share/cmake-3.19/Modules/Compiler/MSVC-C.cmake
+D:/Cmake/share/cmake-3.19/Modules/Compiler/MSVC-CXX.cmake
+D:/Cmake/share/cmake-3.19/Modules/Platform/Windows-MSVC-C.cmake
+D:/Cmake/share/cmake-3.19/Modules/Platform/Windows-MSVC-CXX.cmake
+D:/Cmake/share/cmake-3.19/Modules/Platform/Windows-MSVC.cmake
+D:/Cmake/share/cmake-3.19/Modules/Platform/Windows.cmake
+D:/Cmake/share/cmake-3.19/Modules/Platform/WindowsPaths.cmake
+D:/Repositories/Natverks-lab-4/NetworkServer/CMakeLists.txt
+D:/Repositories/Natverks-lab-4/NetworkServer/build/CMakeFiles/3.19.3/CMakeCCompiler.cmake
+D:/Repositories/Natverks-lab-4/NetworkServer/build/CMakeFiles/3.19.3/CMakeCXXCompiler.cmake
+D:/Repositories/Natverks-lab-4/NetworkServer/build/CMakeFiles/3.19.3/CMakeRCCompiler.cmake
+D:/Repositories/Natverks-lab-4/NetworkServer/build/CMakeFiles/3.19.3/CMakeSystem.cmake

@@ -1,6 +1,5 @@
 ﻿  main.cpp
-D:\Repositories\Natverks-lab-4\NetworkClient\NetworkClient\main.cpp(148,44): warning C4267: '=': conversion from 'size_t' to 'short', possible loss of data
-D:\Repositories\Natverks-lab-4\NetworkClient\NetworkClient\main.cpp(168,28): warning C4838: conversion from 'int' to 'BYTE' requires a narrowing conversion
-D:\Repositories\Natverks-lab-4\NetworkClient\NetworkClient\main.cpp(178,23): warning C4838: conversion from 'int' to 'unsigned int' requires a narrowing conversion
-D:\Repositories\Natverks-lab-4\NetworkClient\NetworkClient\main.cpp(257,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
+D:\Repositories\Natverks-lab-4\NetworkClient\NetworkClient\main.cpp(147,44): warning C4267: '=': conversion from 'size_t' to 'short', possible loss of data
+D:\Repositories\Natverks-lab-4\NetworkClient\NetworkClient\main.cpp(188,23): warning C4838: conversion from 'int' to 'unsigned int' requires a narrowing conversion
+D:\Repositories\Natverks-lab-4\NetworkClient\NetworkClient\main.cpp(322,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
   NetworkClient.vcxproj -> D:\Repositories\Natverks-lab-4\NetworkClient\Debug\NetworkClient.exe

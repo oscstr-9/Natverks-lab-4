@@ -130,13 +130,12 @@ struct SendInfo {
     PixelInfo pixels[5120];
 }pack;
 
+/**
+Sends the positions of all clients to the GUI 
+@param the socket that connects to the java GUI
+*/
 void SendPosToGui(SOCKET javaSocket) {
     // Bind the ip address and port to a socket
-    //sockaddr_in6 hint;
-    //hint.sin6_family = AF_INET6;
-    //hint.sin6_port = htons(54000);
-    //hint.sin6_addr = in6addr_any; // Could also use inet_pton ....
-
     sockaddr_in6 hint;
     memset(&hint, 0, sizeof(hint));
     hint.sin6_family = AF_INET6;
@@ -158,20 +157,31 @@ void SendPosToGui(SOCKET javaSocket) {
     }
 }
 
-void SendLeaveToGui(SOCKET javaSocket, int clientId) {
+/**
+Sends a leave message to the server
+@param the socket that connects to the java GUI
+@param the socket that connects to the server
+@param this clients ID
+*/
+void SendLeaveToServer(SOCKET javaSocket, SOCKET gameSocket, unsigned int clientId) {
     // Bind the ip address and port to a socket
     sockaddr_in6 hint;
     hint.sin6_family = AF_INET6;
     hint.sin6_port = htons(54000);
     hint.sin6_addr = in6addr_any; // Could also use inet_pton ....
 
-    PixelInfo pixel = {0,0,clientId };
-    SendInfo info = { 1, pixel };
-    int sendOk = sendto(javaSocket, (const char*)&info, sizeof(PixelInfo) + sizeof(short), 0, (sockaddr*)&hint, sizeof(hint));
-
+    LeaveMsg leaveMsg{ MsgHead{sizeof(LeaveMsg), 0, clientId, Leave}};
+    int sendOk = sendto(gameSocket, (const char*)&leaveMsg, sizeof(leaveMsg), 0, (sockaddr*)&hint, sizeof(hint));
 }
 
-// Function to move player to specified positions
+
+/**
+Function to move player to specified positions
+@param this clients x pos
+@param this clients y pos
+@param this clients ID
+@param the socket that connects to the server
+*/
 int MoveFunc(int x, int y, int clientId, SOCKET gameSocket) {
     std::cout << x << " " << y << std::endl;
     MoveEvent moving = {
@@ -189,71 +199,126 @@ int MoveFunc(int x, int y, int clientId, SOCKET gameSocket) {
 
 int x = 0, y = 0;
 
-
+/**
+Recieves and decrypts the incomming messages from the server
+@param the socket that connects to the server
+@param the socket that connects to the java GUI
+@param this clients ID
+*/
 void DoWork(SOCKET gameSocket, SOCKET javaSocket, int thisClientId) {
     // Create variables for message holding
-    char buf[65536];
-    ChangeMsg* msg = (ChangeMsg*)buf;
-    NewPlayerPositionMsg* NPPmsg = (NewPlayerPositionMsg*)buf;
-    PlayerLeaveMsg* PLmsg = (PlayerLeaveMsg*)buf;
-    NewPlayerMsg* NPmsg = (NewPlayerMsg*)buf;
+        char buf[65536];
 
     // Recieve info and write to buf
-    recv(gameSocket, buf, sizeof(buf), 0);
+     int msgSize = recv(gameSocket, buf, sizeof(buf), 0);
+     
+     int bufOffset = 0;
 
-    // useful info
-    cout << "My Stats" << endl;
-    cout << "<---------------------------->" << endl;
-    cout << "Player ID: " << msg->head.id << endl;
-    cout << "SeqNo: " << msg->head.seqNo << endl;
-    cout << "Length: " << msg->head.length << endl;
-    cout << "Type: " << msg->type << endl;
-    cout << "X: " << NPPmsg->pos.x << endl;
-    cout << "Y: " << NPPmsg->pos.y << endl;
-    cout << "<---------------------------->" << endl << endl;
+    while (true) {
+        ChangeMsg* msg = (ChangeMsg*)(buf + bufOffset);
+        MsgHead* msghead = (MsgHead*)(buf + bufOffset);
+        NewPlayerPositionMsg* NPPmsg = (NewPlayerPositionMsg*)(buf + bufOffset);
+        PlayerLeaveMsg* PLmsg = (PlayerLeaveMsg*)(buf + bufOffset);
+        NewPlayerMsg* NPmsg = (NewPlayerMsg*)(buf + bufOffset);
+
+        // useful info
+        /*cout << "My Stats" << endl;
+        cout << "<---------------------------->" << endl;
+        cout << "Player ID: " << msg->head.id << endl;
+        cout << "SeqNo: " << msg->head.seqNo << endl;
+        cout << "Length: " << msg->head.length << endl;
+        cout << "Type: " << msg->type << endl;
+        cout << "X: " << NPPmsg->pos.x << endl;
+        cout << "Y: " << NPPmsg->pos.y << endl;
+        cout << "<---------------------------->" << endl << endl;*/
+
+        // Check message type and print info accordingly
+        switch (msg->type)
+        {
+        case NewPlayer:
+            cout << "NewPlayer msg" << endl;
+            cout << "Player name: " << NPmsg->name << endl;
+            cout << "Player ID: " << NPmsg->msg.head.id << endl << endl;
+            break;
+
+        case PlayerLeave:
+            cout << "PlayerLeave msg" << endl;
+            cout << "Player ID: " << PLmsg->msg.head.id << endl << endl;
+            playerInfo.erase(PLmsg->msg.head.id);
+            break;
+
+        case NewPlayerPosition:
+            cout << "NewPosition msg" << endl;
+
+            cout << "Player ID: " << NPPmsg->msg.head.id << endl;
+            cout << "Current pos: x = " << NPPmsg->pos.x << " y = " << NPPmsg->pos.y << endl << endl;
+
+            playerInfo[NPPmsg->msg.head.id][0] = NPPmsg->pos.x;
+            playerInfo[NPPmsg->msg.head.id][1] = NPPmsg->pos.y;
+
+            SendPosToGui(javaSocket);
 
 
-    // Check message type and print info accordingly
-    switch (msg->type)
-    {
-    case NewPlayer:
-        cout << "NewPlayer msg" << endl;
-        cout << "Player name: " << NPmsg->name << endl;
-        cout << "Player ID: " << NPmsg->msg.head.id << endl << endl;
-        break;
+            if (NPPmsg->msg.head.id == thisClientId) {
+                // Update position
+                x = NPPmsg->pos.x;
+                y = NPPmsg->pos.y;
+            }
+            break;
 
-    case PlayerLeave:
-        cout << "PlayerLeave msg" << endl;
-        cout << "Player ID: " << PLmsg->msg.head.id << endl << endl;
-        playerInfo.erase(PLmsg->msg.head.id);
-        SendLeaveToGui(javaSocket, PLmsg->msg.head.id);
-        break;
-
-    case NewPlayerPosition:
-        cout << "NewPosition msg" << endl;
-
-        cout << "Player ID: " << NPPmsg->msg.head.id << endl;
-        cout << "Current pos: x = " << NPPmsg->pos.x << " y = " << NPPmsg->pos.y << endl << endl;
-
-        playerInfo[NPPmsg->msg.head.id][0] = NPPmsg->pos.x;
-        playerInfo[NPPmsg->msg.head.id][1] = NPPmsg->pos.y;
-
-        SendPosToGui(javaSocket);
-
-
-        if (NPPmsg->msg.head.id == thisClientId) {
-            // Update position
-            x = NPPmsg->pos.x;
-            y = NPPmsg->pos.y;
+        default:
+            cout << "No change type msg!" << endl;
+            break;
         }
-        break;
 
-    default:
-        cout << "No change type msg!" << endl;
-        break;
+        bufOffset += msg->head.length;
+        if (bufOffset >= msgSize) {
+            break;
+        }
     }
 }
 
+/**
+Recieves and decrypts the incomming messages from the GUI
+@param the socket that connects to the server
+@param the socket that connects to the java GUI
+@param this clients ID
+*/
+void DoGUIwork(SOCKET javaSocket, SOCKET gameSocket, int thisClientId) {
+    unsigned char buf[65536];
+    sockaddr* address = 0;
+    int* fromlen = 0;
+
+    int msgSize = recvfrom(javaSocket, (char*)buf, sizeof(buf), 0, address, fromlen);
+
+    if (thisClientId == buf[0]) {
+        switch (buf[1])
+        {
+        case 0:
+            // move up
+            MoveFunc(x, y - 1, thisClientId, gameSocket);
+            break;
+        case 1:
+            // move left
+            MoveFunc(x - 1, y, thisClientId, gameSocket);
+            break;
+        case 2:
+            // move down
+            MoveFunc(x, y + 1, thisClientId, gameSocket);
+            break;
+        case 3:
+            // move right
+            MoveFunc(x + 1, y, thisClientId, gameSocket);
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+/**
+Main function. sets up sockets and addresses to be used throughout the entire program for both sending and recieving
+*/
 void main() {
     /// Startup Winsock
     WSADATA data;
@@ -268,7 +333,8 @@ void main() {
     sockaddr_in server;
     memset(&server, 0, sizeof(server));
     server.sin_family = AF_INET;
-    server.sin_port = htons(49152);
+    //server.sin_port = htons(49152);
+    server.sin_port = htons(9002);
     inet_pton(AF_INET, "192.168.1.65", &server.sin_addr);
 
     /// Socket creation
@@ -292,22 +358,22 @@ void main() {
     recv(gameSocket, buf, sizeof(buf), 0);
     ChangeMsg* msg = (ChangeMsg*)buf;
     int thisClientId = msg->head.id;
+    std::cout << "My ID: " << thisClientId << std::endl;
+
 
 //----------------------------------For JAVA------------------------------------------
 
     // Bind the ip address and port to a socket
-    //sockaddr_in6 hint;
-    //memset(&hint, 0, sizeof(hint));
-    //hint.sin6_family = AF_INET6;
-    //hint.sin6_port = htons(54000);
-    ////hint.sin6_addr = in6addr_any; // Could also use inet_pton ....
-    //inet_pton(AF_INET6, "::1", &hint.sin6_addr);
 
     SOCKET javaSocket = socket(AF_INET6, SOCK_DGRAM, 0);
+    sockaddr_in6 hint;
+    memset(&hint, 0, sizeof(hint));
+    hint.sin6_family = AF_INET6;
+    hint.sin6_port = htons(54001);
+    inet_pton(AF_INET6, "::1", &hint.sin6_addr);
 
-   // SendPosToGui(javaSocket, x, y, clientId);
-
-    //bind(javaSocket, (const sockaddr*)&hint, sizeof(hint));
+    if (SOCKET_ERROR == bind(javaSocket, (const sockaddr*)&hint, sizeof(hint)))
+        std::cout << GetLastError() << std::endl;
 
     // Create the master file descriptor set and zero it
     fd_set master;
@@ -325,7 +391,7 @@ void main() {
             if (command == "moved") MoveFunc(x, y + 1, thisClientId, gameSocket);
             if (command == "movel") MoveFunc(x - 1, y, thisClientId, gameSocket);
             if (command == "mover") MoveFunc(x + 1, y, thisClientId, gameSocket);
-            if (command == "q") { SendLeaveToGui(javaSocket, thisClientId); return; }
+            if (command == "q") { SendLeaveToServer(javaSocket, gameSocket, thisClientId); return; }
         }
     });
     //Send package to everyone
@@ -343,7 +409,7 @@ void main() {
         
         if (FD_ISSET(javaSocket, &copy))
         {
-
+            DoGUIwork(javaSocket, gameSocket, thisClientId);
         }
     }
 

@@ -1,0 +1,10 @@
+^D:\REPOSITORIES\NATVERKS-LAB-4\NETWORKSERVER\CMAKELISTS.TXT
+setlocal
+D:\Cmake\bin\cmake.exe -SD:/Repositories/Natverks-lab-4/NetworkServer -BD:/Repositories/Natverks-lab-4/NetworkServer/build --check-stamp-file D:/Repositories/Natverks-lab-4/NetworkServer/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

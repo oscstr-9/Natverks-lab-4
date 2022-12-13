@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\Repositories\Natverks-lab-4\NetworkServer\build\CMakeFiles\a34ebedb6c38ae822ab751b3c7c2a9d6\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{D89263F7-062B-30FF-8198-A104E8A40726}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

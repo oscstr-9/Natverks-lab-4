@@ -1,0 +1,3 @@
+D:/Repositories/Natverks-lab-4/NetworkServer/build/CMakeFiles/NetworkServer.dir
+D:/Repositories/Natverks-lab-4/NetworkServer/build/CMakeFiles/ALL_BUILD.dir
+D:/Repositories/Natverks-lab-4/NetworkServer/build/CMakeFiles/ZERO_CHECK.dir

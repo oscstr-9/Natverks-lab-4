@@ -31,7 +31,8 @@ public class PixelCanvas extends JComponent {
                 color = pixel.get(i).getColor();
                 switch (color) {
                     case 0:
-                        continue;
+                        g.setColor(new Color(200,175,150));
+                        break;
                     case 1:
                         g.setColor(Color.red);
                         break;
@@ -56,10 +57,9 @@ public class PixelCanvas extends JComponent {
                     case 8:
                         g.setColor(Color.cyan);
                         break;
+                    default:
+                        continue;
                 }
-                System.out.print("width / 2: ");
-                System.out.print(pixel.get(i).getX());
-                System.out.print("\n");
                 g.fillRect(pixel.get(i).getX(), pixel.get(i).getY(), 4, 4);
             }
         }

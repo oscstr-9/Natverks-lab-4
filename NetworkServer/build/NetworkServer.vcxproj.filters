@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Repositories\Natverks-lab-4\NetworkServer\src\main.cc">
+      <Filter>NetworkServer</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Repositories\Natverks-lab-4\NetworkServer\cmakelists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="NetworkServer">
+      <UniqueIdentifier>{727F577E-8924-32F8-8210-F5CFAD13FC22}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

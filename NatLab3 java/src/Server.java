@@ -1,8 +1,6 @@
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
+import java.nio.*;
 import java.util.ArrayList;
 
 /**
@@ -18,6 +16,8 @@ public class Server {
     /** Variables to be set in order to get the right network settings*/
     private DatagramSocket udpSocket;
     private int port;
+    private byte firstConnectedID = -1;
+
 
     /**
      Has the program set a port and datagram socket.
@@ -44,11 +44,15 @@ public class Server {
             // blocks until a packet is received
             udpSocket.receive(packet);
 
-            System.out.println(packet);
-
             msg.clear();
+
+            // Saves the first id that connects to the GUI for inputs later
+            if(firstConnectedID == -1){
+                firstConnectedID = packet.getData()[2];
+            }
+
             int amountOfPixels = (Byte.toUnsignedInt(packet.getData()[0])+((packet.getData()[1])<<8));
-            System.out.print(amountOfPixels);
+            // Goes through the entire message and reconstructs all the pixels
             for (int i = 2; i < amountOfPixels*3; i+=3){
                 msg.add(new Pixel(Byte.toUnsignedInt(packet.getData()[i]),Byte.toUnsignedInt(packet.getData()[i+1]),Byte.toUnsignedInt(packet.getData()[i+2])));
             }
@@ -57,4 +61,18 @@ public class Server {
         }
     }
 
+    /**
+     * sends a package to the client saying that a specific player moved in a certain direction
+     * @param moveDir the direction the player moved
+     */
+    public void sendInputsToClient(byte moveDir){
+        byte[] sendData = {firstConnectedID, moveDir};
+
+        try {
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, Inet6Address.getByName("::1"), 54001);
+            udpSocket.send(sendPacket);
+        }catch(Exception  e){
+            e.printStackTrace();
+        }
+    }
 }
